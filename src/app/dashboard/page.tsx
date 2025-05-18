@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { getAuth, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import Link from 'next/link';
-import { Loader2 } from 'lucide-react';
+import { Loader2, FilePlus2, ListChecks } from 'lucide-react';
 
 import { db } from '@/lib/firebase';
 import Statistiques from '@/components/Statistiques';
@@ -68,17 +68,21 @@ export default function DashboardPage() {
       <h1 className="text-4xl font-bold mb-10 text-center">Bienvenue dans le Dashboard !</h1>
 
       <Card className="w-full max-w-md shadow-xl">
-        <CardHeader>
-          <CardTitle className="text-2xl text-center">Actions Rapides</CardTitle>
+        <CardHeader className="text-center pb-4">
+          <CardTitle className="text-2xl">Actions Rapides</CardTitle>
         </CardHeader>
-        <CardContent className="flex flex-col gap-4">
+        <CardContent className="flex flex-col space-y-3">
           {role === 'employe' && (
             <>
               <Button asChild className="w-full py-6 text-lg">
-                <Link href="/nouvelle-demande">Faire une demande</Link>
+                <Link href="/nouvelle-demande">
+                  <FilePlus2 className="mr-2 h-5 w-5" /> Faire une demande
+                </Link>
               </Button>
               <Button asChild variant="secondary" className="w-full py-6 text-lg">
-                <Link href="/mes-demandes">Voir mes demandes</Link>
+                <Link href="/mes-demandes">
+                  <ListChecks className="mr-2 h-5 w-5" /> Voir mes demandes
+                </Link>
               </Button>
             </>
           )}
@@ -112,6 +116,6 @@ export default function DashboardPage() {
       >
         Se déconnecter
       </Button>
-      </div>
+    </div>
   );
 }

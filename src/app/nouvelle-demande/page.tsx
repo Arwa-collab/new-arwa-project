@@ -13,7 +13,7 @@ import { db, auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AuthGuard from "@/components/AuthGuard";
 import { toast } from "react-hot-toast";
-import { Loader2, Home, FilePlus } from "lucide-react"; 
+import { Loader2, Home } from "lucide-react"; 
 import { Button } from "@/components/ui/button"; 
 import {
   Card,
@@ -110,18 +110,21 @@ export default function NouvelleDemandePage() {
 
   return (
     <AuthGuard allowedRoles={["employe"]}>
-      <div className="container mx-auto py-10 px-4 sm:px-6 lg:px-8">
-        <Breadcrumb className="mb-8">
+      <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col min-h-screen">
+        <Breadcrumb className="mb-6 sm:mb-8">
           <BreadcrumbList>
             <BreadcrumbItem>
               <BreadcrumbLink asChild>
-                <Link href="/dashboard"><Home className="h-4 w-4" /> Tableau de bord</Link>
+                <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground">
+                  <Home className="h-4 w-4" />
+                  Tableau de bord
+                </Link>
               </BreadcrumbLink>
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>
-                <FilePlus className="h-4 w-4 mr-1.5 inline-block" /> Nouvelle Demande
+              <BreadcrumbPage className="text-sm font-medium text-foreground">
+                Nouvelle Demande
               </BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
