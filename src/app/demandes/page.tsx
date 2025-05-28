@@ -58,7 +58,12 @@ export default function DemandesPage() {
 
     try {
       if (statut === "acceptée") {
-        await deduireQuantiteStock(demande.typeProduit, demande.quantite);
+        await deduireQuantiteStock(
+          demande.typeProduit,
+          demande.marque,
+          demande.modele,
+          demande.quantite
+        );
       }
 
       await updateDoc(doc(db, "demandes", id), { statut });
@@ -133,31 +138,6 @@ export default function DemandesPage() {
     );
   };
 
-  // Fonction pour déduire la quantité du stock
-  async function deduireQuantiteStock(produitId: string, quantiteDemandee: number) {
-    if (!produitId) {
-      alert("Produit manquant !");
-      return;
-    }
-    const produitRef = doc(db, "produits", produitId);
-    const produitSnap = await getDoc(produitRef);
-
-    if (!produitSnap.exists()) {
-      alert("Produit non trouvé !");
-      return;
-    }
-
-    const produitData = produitSnap.data();
-    const nouvelleQuantite = (produitData.quantite || 0) - quantiteDemandee;
-
-    if (nouvelleQuantite < 0) {
-      alert("Stock insuffisant !");
-      return;
-    }
-
-    await updateDoc(produitRef, { quantite: nouvelleQuantite });
-  }
-
   useEffect(() => {
     fetchDemandes();
   }, []);
@@ -231,4 +211,36 @@ export default function DemandesPage() {
       </div>
     </AuthGuard>
   );
+}
+
+async function deduireQuantiteStock(typeProduit: string, marque: string, modele: string, quantiteDemandee: number) {
+  if (!typeProduit || !marque || !modele) {
+    alert("Produit manquant !");
+    return;
+  }
+
+  const produitsRef = collection(db, "produits");
+  const q = query(
+    produitsRef,
+    where("typeProduit", "==", typeProduit),
+    where("marque", "==", marque),
+    where("modele", "==", modele)
+  );
+  const querySnapshot = await getDocs(q);
+
+  if (querySnapshot.empty) {
+    alert("Produit non trouvé !");
+    return;
+  }
+
+  const produitDoc = querySnapshot.docs[0];
+  const produitData = produitDoc.data();
+  const nouvelleQuantite = (produitData.quantite || 0) - quantiteDemandee;
+
+  if (nouvelleQuantite < 0) {
+    alert("Stock insuffisant !");
+    return;
+  }
+
+  await updateDoc(produitDoc.ref, { quantite: nouvelleQuantite });
 }
