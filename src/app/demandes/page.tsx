@@ -10,6 +10,7 @@ import {
   doc,
   Timestamp,
   getDoc,
+  addDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import AuthGuard from "@/components/AuthGuard";
@@ -222,9 +223,9 @@ async function deduireQuantiteStock(typeProduit: string, marque: string, modele:
   const produitsRef = collection(db, "produits");
   const q = query(
     produitsRef,
-    where("typeProduit", "==", typeProduit),
-    where("marque", "==", marque),
-    where("modele", "==", modele)
+    where("typeProduit", "==", typeProduit.trim().toUpperCase()),
+    where("marque", "==", marque.trim().toUpperCase()),
+    where("modele", "==", modele.trim().toUpperCase())
   );
   const querySnapshot = await getDocs(q);
 
@@ -243,4 +244,46 @@ async function deduireQuantiteStock(typeProduit: string, marque: string, modele:
   }
 
   await updateDoc(produitDoc.ref, { quantite: nouvelleQuantite });
+}
+
+async function ajouterProduit(typeProduit: string, marque: string, modele: string, quantite: number) {
+  if (!typeProduit || !marque || !modele) {
+    alert("Veuillez remplir tous les champs obligatoires.");
+    return;
+  }
+
+  try {
+    await addDoc(collection(db, "produits"), {
+      typeProduit: typeProduit.trim().toLowerCase(),
+      marque: marque.trim().toLowerCase(),
+      modele: modele.trim().toLowerCase(),
+      quantite,
+      // autres champs...
+    });
+    alert("Produit ajouté avec succès !");
+  } catch (error) {
+    console.error("Erreur lors de l'ajout du produit :", error);
+    alert("Erreur lors de l'ajout du produit.");
+  }
+}
+
+async function modifierProduit(produitId: string, typeProduit: string, marque: string, modele: string, quantite: number) {
+  if (!produitId || !typeProduit || !marque || !modele) {
+    alert("Veuillez remplir tous les champs obligatoires.");
+    return;
+  }
+
+  try {
+    await updateDoc(doc(db, "produits", produitId), {
+      typeProduit: typeProduit.trim().toLowerCase(),
+      marque: marque.trim().toLowerCase(),
+      modele: modele.trim().toLowerCase(),
+      quantite,
+      // autres champs...
+    });
+    alert("Produit modifié avec succès !");
+  } catch (error) {
+    console.error("Erreur lors de la modification du produit :", error);
+    alert("Erreur lors de la modification du produit.");
+  }
 }

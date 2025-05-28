@@ -69,9 +69,19 @@ function AddDemandePage() {
     }
 
     try {
+      const selectedProduct = produits.find((p) => p.id === selectedProductId); // Trouve le produit sélectionné dans la liste des produits
+
+      // Vérifie que le produit sélectionné existe
+      if (!selectedProduct) {
+        alert("Produit sélectionné non trouvé.");
+        return;
+      }
+
       // Crée un nouveau document dans la collection "demandes"
       await addDoc(collection(db, "demandes"), {
-        produitId: selectedProductId,
+        typeProduit: selectedProduct.typeProduit.trim().toUpperCase(),
+        marque: selectedProduct.marque.trim().toUpperCase(),
+        modele: selectedProduct.modele.trim().toUpperCase(),
         quantite: quantiteDemandee,
         statut: "en attente",
         date: new Date(),
