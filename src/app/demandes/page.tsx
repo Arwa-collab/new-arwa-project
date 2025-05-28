@@ -20,7 +20,6 @@ import { Home } from "lucide-react";
 
 interface Demande {
   id: string;
-  produitId: string; // <-- ajoute cette ligne
   typeProduit: string;
   modele: string;
   marque: string;
@@ -59,10 +58,12 @@ export default function DemandesPage() {
 
     try {
       if (statut === "acceptée") {
-        await deduireQuantiteStock(demande.produitId, demande.quantite);
+        await deduireQuantiteStock(demande.typeProduit, demande.quantite);
       }
 
       await updateDoc(doc(db, "demandes", id), { statut });
+
+      // Envoi d'email supprimé ici
 
       fetchDemandes();
     } catch (error) {

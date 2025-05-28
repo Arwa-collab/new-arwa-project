@@ -16,6 +16,8 @@ import AuthGuard from "@/components/AuthGuard"; // Composant de protection d'acc
  */
 interface Product {
   id: string;
+  typeProduit: string;
+  modele: string;
   marque: string;
   quantite: number;
 }
