@@ -40,11 +40,21 @@ interface UserData {
   nom: string;
   prenom: string;
   matricule: string;
-  // Add other user fields if necessary
+  nomProduit: string;
+  quantite: number;
+  modele?: string; // <-- Ajout ici si nécessaire
 }
 
 export default function NouvelleDemandePage() {
   const [entite, setEntite] = useState("");
+  const [nom, setNom] = useState("");
+  const [prenom, setPrenom] = useState("");
+  const [matricule, setMatricule] = useState("");
+  
+  const [quantite, setQuantite] = useState<number | string>("");
+  const [typeProduit, setTypeProduit] = useState("");
+  const [marque, setMarque] = useState("");
+  const [modele, setModele] = useState("");
   const [userData, setUserData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
   const router = useRouter();
@@ -55,7 +65,13 @@ export default function NouvelleDemandePage() {
         try {
           const userDoc = await getDoc(doc(db, "users", user.uid));
           if (userDoc.exists()) {
-            setUserData(userDoc.data() as UserData);
+            const data = userDoc.data() as UserData;
+            setUserData(data);
+            setNom(data.nom || "");
+            setPrenom(data.prenom || "");
+            setMatricule(data.matricule || "");
+            
+            setQuantite(data.quantite || "");
           }
         } catch (error) {
           console.error("Error fetching user data: ", error);
@@ -72,7 +88,7 @@ export default function NouvelleDemandePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!entite || !userData) {
+    if (!entite || !nom || !prenom || !matricule || !typeProduit || !marque || !quantite) {
       toast.error("Veuillez remplir tous les champs requis.");
       return;
     }
@@ -81,14 +97,18 @@ export default function NouvelleDemandePage() {
 
     try {
       await addDoc(collection(db, "demandes"), {
-        nom: userData.nom,
-        prenom: userData.prenom,
-        matricule: userData.matricule,
+        nom,
+        prenom,
+        matricule,
         entite,
-        demandeurId: userData.matricule, 
+        demandeurId: matricule,
         date: dateActuelle,
         createdAt: serverTimestamp(),
         statut: "en attente",
+        typeProduit,
+        marque,
+        modele, // <-- Ajout ici
+        quantite,
       });
 
       toast.success("Demande envoyée avec succès !");
@@ -144,18 +164,18 @@ export default function NouvelleDemandePage() {
                   <Label htmlFor="nom">Nom</Label>
                   <Input
                     id="nom"
-                    disabled
-                    value={userData?.nom || ""}
-                    className="bg-muted/50"
+                    required
+                    value={nom}
+                    onChange={(e) => setNom(e.target.value)}
                   />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="prenom">Prénom</Label>
                   <Input
                     id="prenom"
-                    disabled
-                    value={userData?.prenom || ""}
-                    className="bg-muted/50"
+                    required
+                    value={prenom}
+                    onChange={(e) => setPrenom(e.target.value)}
                   />
                 </div>
               </div>
@@ -163,9 +183,9 @@ export default function NouvelleDemandePage() {
                 <Label htmlFor="matricule">Matricule</Label>
                 <Input
                   id="matricule"
-                  disabled
-                  value={userData?.matricule || ""}
-                  className="bg-muted/50"
+                  required
+                  value={matricule}
+                  onChange={(e) => setMatricule(e.target.value)}
                 />
               </div>
               <div className="space-y-2">
@@ -178,8 +198,49 @@ export default function NouvelleDemandePage() {
                   placeholder="Ex: Département RH, Service Technique, Unité Logistique..."
                 />
               </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="quantite">Quantité</Label>
+                <Input
+                  id="quantite"
+                  required
+                  type="number"
+                  value={quantite}
+                  onChange={(e) => setQuantite(e.target.value)}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="typeProduit">Type de produit</Label>
+                <Input
+                  id="typeProduit"
+                  required
+                  value={typeProduit}
+                  onChange={(e) => setTypeProduit(e.target.value)}
+                  placeholder="Ex: ordinateur, toner..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="marque">Marque</Label>
+                <Input
+                  id="marque"
+                  required
+                  value={marque}
+                  onChange={(e) => setMarque(e.target.value)}
+                  placeholder="Ex: Samsung, HP..."
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="modele">Modèle</Label>
+                <Input
+                  id="modele"
+                  required
+                  value={modele}
+                  onChange={(e) => setModele(e.target.value)}
+                  placeholder="Ex: Galaxy S21, LaserJet Pro..."
+                />
+              </div>
               <CardFooter className="flex justify-end pt-6">
-                <Button type="submit" disabled={!userData || !entite} className="px-8 py-3 text-lg">
+                <Button type="submit" disabled={!nom || !prenom || !matricule || !entite || !typeProduit || !marque || !quantite} className="px-8 py-3 text-lg">
                   Envoyer la demande
                 </Button>
               </CardFooter>

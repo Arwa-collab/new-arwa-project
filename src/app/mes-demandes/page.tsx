@@ -8,6 +8,8 @@ import {
   getDocs,
   orderBy,
   Timestamp,
+  doc,        // <-- ajoute ceci
+  getDoc,     // <-- et ceci
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
@@ -71,36 +73,42 @@ export default function MesDemandesPage() {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
       if (user) {
         try {
-          const userQuery = query(collection(db, "users"), where("uid", "==", user.uid));
-          const userDocSnap = await getDocs(userQuery);
-          const userData = userDocSnap.docs[0]?.data();
+          const userDocRef = doc(db, "users", user.uid);
+          const userDocSnap = await getDoc(userDocRef);
+          const userData = userDocSnap.data();
           const matricule = userData?.matricule;
+          
           setUserMatricule(matricule);
+          console.log("Matricule utilisateur connecté :", matricule);
 
           if (!matricule) {
-            setLoading(false);
+            setLoading(false); 
             return;
           }
 
           const q = query(
             collection(db, "demandes"),
             where("demandeurId", "==", matricule),
-            orderBy("createdAt", "desc") 
+            orderBy("createdAt", "desc")
           );
           const snapshot = await getDocs(q);
           const data = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          })) as Demande[];
+          })) as any[];
+
+          console.log("Demandes récupérées :", data);
+          if (data.length > 0) {
+            data.forEach(demande => {
+              console.log("demandeurId de la demande :", demande.demandeurId);
+            });
+          }
 
           setDemandes(data);
           setFilteredDemandes(data); 
         } catch (error) {
           console.error("Error fetching data: ", error);
-          // Optionally show a toast error
         }
-      } else {
-        // Handle user not logged in if necessary, e.g., redirect
       }
       setLoading(false);
     });

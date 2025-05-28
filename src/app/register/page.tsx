@@ -27,7 +27,7 @@ export default function RegisterPage() {
     prenom: "",
     matricule: "",
     entite: "",
-    email: "",
+    identifiant: "",
     password: "",
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -38,8 +38,8 @@ export default function RegisterPage() {
   };
 
   const validateForm = () => {
-    const { nom, prenom, matricule, email, password } = formData;
-    if (!nom || !prenom || !matricule || !email || !password) {
+    const { nom, prenom, matricule, identifiant, password } = formData;
+    if (!nom || !prenom || !matricule || !identifiant || !password) {
       toast.error("Veuillez remplir tous les champs obligatoires.");
       return false;
     }
@@ -57,9 +57,12 @@ export default function RegisterPage() {
     setIsLoading(true);
 
     try {
+      // Génère un email fictif à partir de l'identifiant
+      const email = `${formData.identifiant.toLowerCase().trim()}@mondomaine.com`;
+
       const userCredential = await createUserWithEmailAndPassword(
         auth,
-        formData.email,
+        email,
         formData.password
       );
 
@@ -69,7 +72,8 @@ export default function RegisterPage() {
         prenom: formData.prenom.trim(),
         matricule: formData.matricule.trim(),
         entite: formData.entite.trim(),
-        email: formData.email.toLowerCase().trim(),
+        identifiant: formData.identifiant.trim(), // On stocke l'identifiant
+        email: email, // email généré
         role: "employe",
         createdAt: new Date().toISOString(),
       });
@@ -79,7 +83,7 @@ export default function RegisterPage() {
     } catch (err: any) {
       setIsLoading(false);
       if (err.code === 'auth/email-already-in-use') {
-        toast.error("Cette adresse e-mail est déjà utilisée.");
+        toast.error("Cet identifiant est déjà utilisé.");
       } else if (err.code === 'auth/weak-password') {
         toast.error("Le mot de passe est trop faible.");
       } else {
@@ -122,8 +126,8 @@ export default function RegisterPage() {
               <Input id="entite" name="entite" placeholder="Département RH" onChange={handleChange} value={formData.entite} disabled={isLoading} />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="email">Adresse e-mail</Label>
-              <Input id="email" type="email" name="email" placeholder="john.doe@example.com" onChange={handleChange} value={formData.email} required disabled={isLoading} />
+              <Label htmlFor="identifiant">identifiant</Label>
+              <Input id="identifiant" type="identifiant" name="identifiant" placeholder="QFatima" onChange={handleChange} value={formData.identifiant} required disabled={isLoading} />
             </div>
             <div className="space-y-1.5">
               <Label htmlFor="password">Mot de passe</Label>

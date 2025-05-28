@@ -5,7 +5,9 @@ import { useRouter } from 'next/navigation';
 import { getAuth, signOut } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
 import Link from 'next/link';
-import { Loader2, FilePlus2, ListChecks } from 'lucide-react';
+import Image from 'next/image';
+import { Loader2, FilePlus2, ListChecks, LogOut, Package, Users, History, BarChart3 } from 'lucide-react';
+import Sidebar from "@/components/Sidebar";
 
 import { db } from '@/lib/firebase';
 import Statistiques from '@/components/Statistiques';
@@ -35,7 +37,6 @@ export default function DashboardPage() {
         }
       } catch (error) {
         console.error("Error fetching user role: ", error);
-        // Optionally, handle the error, e.g., redirect to login or show an error message
       }
       setLoading(false);
     };
@@ -50,72 +51,196 @@ export default function DashboardPage() {
       router.push('/login');
     } catch (error) {
       console.error("Error signing out: ", error);
-      // Optionally, show an error message to the user
     }
   };
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen">
-        <Loader2 className="h-12 w-12 animate-spin text-primary" />
-        <p className="text-muted-foreground mt-4 text-lg">Chargement...</p>
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100">
+        <div className="bg-white p-8 rounded-2xl shadow-xl">
+          <Loader2 className="h-12 w-12 animate-spin text-blue-600 mx-auto" />
+          <p className="text-blue-700 mt-4 text-lg font-medium">Chargement...</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div className="container mx-auto flex flex-col items-center justify-center min-h-screen py-12 px-4">
-      <h1 className="text-4xl font-bold mb-10 text-center">Bienvenue dans le Dashboard !</h1>
+    <div className="flex min-h-screen bg-gradient-to-br from-blue-50 to-slate-100">
+      <Sidebar role={role || ""} />
+      
+      <main className="flex-1 ml-64">
+        {/* Header avec image Branche Eau */}
+        <div className="relative h-32 bg-gradient-to-r from-blue-600 to-blue-800 overflow-hidden">
+          <Image
+            src="/icons/logo.png" // Votre logo Branche Eau
+            alt="Office National de l'Electricité et de l'Eau Potable - Branche Eau"
+            fill
+            className="object-cover opacity-90"
+            priority
+          />
+          <div className="absolute inset-0 bg-blue-900/20"></div>
+          <div className="absolute bottom-4 left-8 text-white">
+            <h1 className="text-2xl font-bold">Dashboard</h1>
+            <p className="text-blue-100 capitalize">Bienvenue, {role}</p>
+          </div>
+          <Button
+            variant="outline"
+            onClick={handleLogout}
+            className="absolute top-4 right-6 bg-white/10 border-white/30 text-white hover:bg-white/20"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Déconnexion
+          </Button>
+        </div>
 
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center pb-4">
-          <CardTitle className="text-2xl">Actions Rapides</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col space-y-3">
-          {role === 'employe' && (
-            <>
-              <Button asChild className="w-full py-6 text-lg">
-                <Link href="/nouvelle-demande">
-                  <FilePlus2 className="mr-2 h-5 w-5" /> Faire une demande
-                </Link>
-              </Button>
-              <Button asChild variant="secondary" className="w-full py-6 text-lg">
-                <Link href="/mes-demandes">
-                  <ListChecks className="mr-2 h-5 w-5" /> Voir mes demandes
-                </Link>
-              </Button>
-            </>
-          )}
+        {/* Contenu principal */}
+        <div className="p-8">
+          <div className="max-w-6xl mx-auto">
+            
+            {/* Actions rapides selon le rôle */}
+            <div className="mb-8">
+              <h2 className="text-2xl font-bold text-gray-800 mb-6">Actions Rapides</h2>
+              
+              {role === 'employe' && (
+                <div className="grid md:grid-cols-2 gap-6 max-w-2xl">
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <FilePlus2 className="h-5 w-5 mr-2" />
+                        Nouvelle Demande
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Créer une nouvelle demande de matériel ou service</p>
+                      <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
+                        <Link href="/nouvelle-demande">
+                          Faire une demande
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
 
-          {role === 'responsable' && (
-            <>
-              <Button asChild className="w-full py-3">
-                <Link href="/products">Gérer les produits</Link>
-              </Button>
-              <Button asChild variant="secondary" className="w-full py-3">
-                <Link href="/demandes">Voir les demandes</Link>
-              </Button>
-              <Button asChild variant="outline" className="w-full py-3">
-                <Link href="/historique">🕓 Historique des demandes</Link>
-              </Button>
-              <Button asChild variant="outline" className="w-full py-3">
-                <Link href="/users">Gérer les utilisateurs</Link>
-              </Button>
-              <div className="mt-4">
-                <Statistiques />
-              </div>
-            </>
-          )}
-        </CardContent>
-      </Card>
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <ListChecks className="h-5 w-5 mr-2" />
+                        Mes Demandes
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Consulter le statut de vos demandes</p>
+                      <Button asChild variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
+                        <Link href="/mes-demandes">
+                          Voir mes demandes
+                        </Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
 
-      <Button
-        variant="destructive"
-        onClick={handleLogout}
-        className="mt-10 py-3 px-8 text-lg"
-      >
-        Se déconnecter
-      </Button>
+              {role === 'responsable' && (
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <Package className="h-5 w-5 mr-2" />
+                        Produits
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Gérer le catalogue des produits</p>
+                      <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
+                        <Link href="/products">Gérer les produits</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <ListChecks className="h-5 w-5 mr-2" />
+                        Demandes
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Traiter les demandes en attente</p>
+                      <Button asChild variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
+                        <Link href="/demandes">Voir les demandes</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <History className="h-5 w-5 mr-2" />
+                        Historique
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Consulter l'historique des demandes</p>
+                      <Button asChild variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
+                        <Link href="/historique">Historique</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <Users className="h-5 w-5 mr-2" />
+                        Utilisateurs
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Gérer les comptes utilisateurs</p>
+                      <Button asChild variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
+                        <Link href="/users">Gérer les utilisateurs</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+
+              {role === 'superviseur' && (
+                <div className="grid md:grid-cols-2 gap-6 max-w-2xl">
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <Package className="h-5 w-5 mr-2" />
+                        Stock & Produits
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Consulter les produits et gérer le stock</p>
+                      <Button asChild className="w-full bg-blue-600 hover:bg-blue-700">
+                        <Link href="/superviseur/stock">Consulter le stock</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </div>
+              )}
+            </div>
+
+            {/* Statistiques pour responsable */}
+            {(role === 'responsable') && (
+              <Card className="border-blue-200">
+                <CardHeader>
+                  <CardTitle className="flex items-center text-blue-800">
+                    <BarChart3 className="h-5 w-5 mr-2" />
+                    Statistiques
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Statistiques />
+                </CardContent>
+              </Card>
+            )}
+          </div>
+        </div>
+      </main>
     </div>
   );
-}
+} 

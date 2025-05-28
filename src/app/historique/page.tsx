@@ -5,12 +5,14 @@ import { collection, getDocs } from 'firebase/firestore';
 import { db } from '@/lib/firebase';
 import AuthGuard from '@/components/AuthGuard';
 import { format } from 'date-fns';
+import Link from "next/link";
+import { Home } from "lucide-react";
+import Sidebar from "@/components/Sidebar";
 
 export default function HistoriquePage() {
   const [demandes, setDemandes] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-  const [startDate, setStartDate] = useState('');
-  const [endDate, setEndDate] = useState('');
+  const [date, setDate] = useState(''); // Un seul champ date
   const [filteredDemandes, setFilteredDemandes] = useState<any[]>([]);
 
   useEffect(() => {
@@ -32,16 +34,29 @@ export default function HistoriquePage() {
     const term = searchTerm.toLowerCase().trim();
 
     const filtered = demandes.filter((d) => {
-      const nom = d.nom?.toLowerCase() || '';
-      const prenom = d.prenom?.toLowerCase() || '';
-      const matchName =
-        nom.includes(term) || prenom.includes(term) || `${prenom} ${nom}`.includes(term);
+      const values = [
+        d.nom,
+        d.prenom,
+        d.matricule,
+        d.entite,
+        d.typeProduit,
+        d.marque,
+        d.quantite?.toString(),
+        d.statut,
+        d.date?.toDate ? format(d.date.toDate(), 'dd/MM/yyyy') : '',
+      ]
+        .map((v) => (v ? v.toString().toLowerCase() : ''))
+        .join(' ');
 
-      const date = d.date?.toDate?.();
-      const matchStart = startDate ? new Date(startDate) <= date : true;
-      const matchEnd = endDate ? new Date(endDate) >= date : true;
+      const matchTerm = values.includes(term);
 
-      return matchName && matchStart && matchEnd;
+      // Filtre sur la date exacte si renseignée
+      let matchDate = true;
+      if (date && d.date?.toDate) {
+        matchDate = format(d.date.toDate(), 'yyyy-MM-dd') === date;
+      }
+
+      return matchTerm && matchDate;
     });
 
     setFilteredDemandes(filtered);
@@ -50,6 +65,10 @@ export default function HistoriquePage() {
   return (
     <AuthGuard allowedRoles={['responsable']}>
       <div className="p-6">
+        <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
+        <Home className="h-4 w-4" />
+        Tableau de bord
+      </Link>
         <h1 className="text-2xl font-bold mb-6">Historique des demandes</h1>
 
         <form
@@ -58,21 +77,15 @@ export default function HistoriquePage() {
         >
           <input
             type="text"
-            placeholder="Rechercher par nom ou prénom"
+            placeholder="Rechercher"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="border px-4 py-2 rounded w-64"
           />
           <input
             type="date"
-            value={startDate}
-            onChange={(e) => setStartDate(e.target.value)}
-            className="border px-4 py-2 rounded"
-          />
-          <input
-            type="date"
-            value={endDate}
-            onChange={(e) => setEndDate(e.target.value)}
+            value={date}
+            onChange={(e) => setDate(e.target.value)}
             className="border px-4 py-2 rounded"
           />
           <button
@@ -91,7 +104,9 @@ export default function HistoriquePage() {
                 <th className="p-2 border">Prénom</th>
                 <th className="p-2 border">Matricule</th>
                 <th className="p-2 border">Entité</th>
-                <th className="p-2 border">Produit</th>
+                <th className="p-2 border">Type produit</th>
+                <th className="p-2 border">Marque</th>
+                <th className="p-2 border">Quantité</th>
                 <th className="p-2 border">Date</th>
                 <th className="p-2 border">Statut</th>
               </tr>
@@ -104,7 +119,9 @@ export default function HistoriquePage() {
                     <td className="p-2 border">{demande.prenom}</td>
                     <td className="p-2 border">{demande.matricule}</td>
                     <td className="p-2 border">{demande.entite}</td>
-                    <td className="p-2 border">{demande.produit || '-'}</td>
+                    <td className="p-2 border">{demande.typeProduit || '-'}</td>
+                    <td className="p-2 border">{demande.marque || '-'}</td>
+                    <td className="p-2 border">{demande.quantite ?? '-'}</td>
                     <td className="p-2 border">
                       {demande.date?.toDate
                         ? format(demande.date.toDate(), 'dd/MM/yyyy')
@@ -115,7 +132,7 @@ export default function HistoriquePage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={7} className="p-4 text-center">
+                  <td colSpan={9} className="p-4 text-center">
                     Aucune demande trouvée.
                   </td>
                 </tr>

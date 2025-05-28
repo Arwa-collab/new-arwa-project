@@ -1,31 +1,45 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { auth, db } from "@/lib/firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-import { useAuth } from "@/context/AuthContext";
 
-interface AuthGuardProps {
+type Props = {
+  allowedRoles?: string[];
   children: React.ReactNode;
-  allowedRoles?: string[]; // les rôles autorisés (ex: ['responsable'])
-}
+};
 
-export default function AuthGuard({ children, allowedRoles }: AuthGuardProps) {
-  const { user, loading, role } = useAuth();
+export default function AuthGuard({ allowedRoles, children }: Props) {
+  const [authorized, setAuthorized] = useState(false);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
-    if (loading) return;
+    const checkAuth = async () => {
+      const user = auth.currentUser;
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      const userDoc = await getDoc(doc(db, "users", user.uid));
+      const userData = userDoc.data();
+      const userRole = userData?.role;
 
-    if (!user) {
-      router.push("/login");
-    } else if (allowedRoles && role && !allowedRoles.includes(role)) {
-      router.push("/unauthorized");
-    }
-  }, [user, loading, role, router, allowedRoles]);
+      // Vérifie si le rôle de l'utilisateur est dans allowedRoles
+      if (!allowedRoles || allowedRoles.includes(userRole)) {
+        setAuthorized(true);
+      } else {
+        router.push("/dashboard");
+      }
+      setLoading(false);
+    };
+    checkAuth();
+  }, [allowedRoles, router]);
 
-  if (loading || !user || (allowedRoles && (!role || !allowedRoles.includes(role)))) {
-    return <div className="p-4">Chargement...</div>;
-  }
+  if (loading) return null;
+  if (!authorized) return null;
 
   return <>{children}</>;
 }
+

@@ -13,7 +13,7 @@ import {
 import { db } from "@/lib/firebase";
 import AuthGuard from "@/components/AuthGuard";
 import { Document, Packer, Paragraph, TextRun } from "docx";
-import { saveAs } from "file-saver";//impo
+import { saveAs } from "file-saver";
 import Link from "next/link";
 import { Home } from "lucide-react";
 
@@ -33,7 +33,6 @@ interface Demande {
 export default function DemandesPage() {
   const [demandes, setDemandes] = useState<Demande[]>([]);
 
-  // Récupération des demandes Firestore
   const fetchDemandes = async () => {
     try {
       const snap = await getDocs(collection(db, "demandes"));
@@ -50,7 +49,6 @@ export default function DemandesPage() {
     }
   };
 
-  // Mise à jour du statut (acceptée ou refusée)
   const handleStatut = async (id: string, statut: "acceptée" | "refusée") => {
     const demande = demandes.find((d) => d.id === id);
     if (!demande) return;
@@ -61,16 +59,12 @@ export default function DemandesPage() {
       }
 
       await updateDoc(doc(db, "demandes", id), { statut });
-
-      // Envoi d'email supprimé ici
-
       fetchDemandes();
     } catch (error) {
       console.error("Erreur de mise à jour :", error);
     }
   };
 
-  // Générer un fichier Word pour une demande acceptée
   const generateWord = async (demande: Demande) => {
     const docWord = new Document({
       sections: [
@@ -102,18 +96,18 @@ export default function DemandesPage() {
               children: [new TextRun(`Quantité : ${demande.quantite}`)],
             }),
             new Paragraph({
-  children: [
-    new TextRun(
-      `Date de la demande : ${
-        demande.date && typeof demande.date.toDate === "function"
-          ? demande.date.toDate().toLocaleString()
-          : typeof demande.date === "string"
-          ? demande.date
-          : "Date inconnue"
-      }`
-    ),
-  ],
-}),
+              children: [
+                new TextRun(
+                  `Date de la demande : ${
+                    demande.date && typeof demande.date.toDate === "function"
+                      ? demande.date.toDate().toLocaleString()
+                      : typeof demande.date === "string"
+                      ? demande.date
+                      : "Date inconnue"
+                  }`
+                ),
+              ],
+            }),
             new Paragraph({ text: "" }),
             new Paragraph({
               children: [
@@ -132,7 +126,6 @@ export default function DemandesPage() {
     );
   };
 
-  // Fonction pour déduire la quantité du stock
   async function deduireQuantiteStock(typeProduit: string, quantiteDemandee: number) {
     if (!typeProduit) {
       alert("Type de produit manquant !");
@@ -167,9 +160,9 @@ export default function DemandesPage() {
     <AuthGuard allowedRoles={["responsable"]}>
       <div className="p-4 max-w-4xl mx-auto">
         <Link href="/dashboard" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-4">
-        <Home className="h-4 w-4" />
-        Tableau de bord
-      </Link>
+          <Home className="h-4 w-4" />
+          Tableau de bord
+        </Link>
         <h1 className="text-2xl font-bold mb-4">Liste des demandes</h1>
         <table className="w-full table-auto border">
           <thead>

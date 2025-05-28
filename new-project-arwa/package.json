@@ -1,0 +1,24 @@
+{
+  "name": "new-project-arwa",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "eslint ."
+  },
+  "dependencies": {
+    "firebase": "^9.6.1",
+    "file-saver": "^2.0.5",
+    "docx": "^7.1.0",
+    "next": "latest",
+    "react": "latest",
+    "react-dom": "latest"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-next": "^12.0.7",
+    "typescript": "^4.4.4"
+  }
+}

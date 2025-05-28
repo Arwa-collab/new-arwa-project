@@ -2,21 +2,23 @@
 
 import { useState } from "react";
 import { db } from "@/lib/firebase";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import { collection, addDoc } from "firebase/firestore";
 import AuthGuard from "@/components/AuthGuard";
 
 export default function AddProductPage() {
   const [formData, setFormData] = useState({
-    nom: "",
-    categorie: "",
+    typeProduit: "",
+    marque: "",
+    modele: "",
+    dateInsertion: "",
+    numeroMarche: "",
     quantite: 0,
-    description: "",
   });
 
   const [successMessage, setSuccessMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData({
       ...formData,
@@ -32,14 +34,15 @@ export default function AddProductPage() {
     try {
       await addDoc(collection(db, "produits"), {
         ...formData,
-        dateAjout: Timestamp.now(),
       });
       setSuccessMessage("Produit ajouté avec succès !");
       setFormData({
-        nom: "",
-        categorie: "",
+        typeProduit: "",
+        marque: "",
+        modele: "",
+        dateInsertion: "",
+        numeroMarche: "",
         quantite: 0,
-        description: "",
       });
     } catch (error: any) {
       setErrorMessage("Erreur lors de l'ajout du produit : " + error.message);
@@ -48,24 +51,51 @@ export default function AddProductPage() {
 
   return (
     <AuthGuard allowedRoles={["responsable"]}>
-  <div className="p-6 max-w-xl mx-auto">
+      <div className="p-6 max-w-xl mx-auto">
         <h1 className="text-2xl font-bold mb-4">Ajouter un produit</h1>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
-            name="nom"
-            placeholder="Nom du produit"
+            name="typeProduit"
+            placeholder="Type de produit"
             className="w-full p-2 border rounded"
-            value={formData.nom}
+            value={formData.typeProduit}
             onChange={handleChange}
             required
           />
           <input
             type="text"
-            name="categorie"
-            placeholder="Catégorie"
+            name="marque"
+            placeholder="Marque"
             className="w-full p-2 border rounded"
-            value={formData.categorie}
+            value={formData.marque}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="modele"
+            placeholder="Modèle"
+            className="w-full p-2 border rounded"
+            value={formData.modele}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="date"
+            name="dateInsertion"
+            placeholder="Date d'insertion"
+            className="w-full p-2 border rounded"
+            value={formData.dateInsertion}
+            onChange={handleChange}
+            required
+          />
+          <input
+            type="text"
+            name="numeroMarche"
+            placeholder="N° de marché"
+            className="w-full p-2 border rounded"
+            value={formData.numeroMarche}
             onChange={handleChange}
             required
           />
@@ -77,13 +107,6 @@ export default function AddProductPage() {
             value={formData.quantite}
             onChange={handleChange}
             required
-          />
-          <textarea
-            name="description"
-            placeholder="Description"
-            className="w-full p-2 border rounded"
-            value={formData.description}
-            onChange={handleChange}
           />
           <button
             type="submit"
