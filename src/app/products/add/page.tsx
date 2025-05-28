@@ -34,6 +34,9 @@ export default function AddProductPage() {
     try {
       await addDoc(collection(db, "produits"), {
         ...formData,
+        typeProduit: formData.typeProduit.trim().toLocaleUpperCase(),
+        marque: formData.marque.trim().toLocaleUpperCase(),
+        modele: formData.modele.trim().toLocaleUpperCase(),
       });
       setSuccessMessage("Produit ajouté avec succès !");
       setFormData({

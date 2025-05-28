@@ -64,12 +64,12 @@ export default function ProduitsPage() {
     if (!filtre) {
       setFilteredProduits(data);
     } else {
-      const lowerFiltre = filtre.toLowerCase();
+      const lowerFiltre = filtre.toLocaleUpperCase();
       setFilteredProduits(
         data.filter((p) =>
           Object.values(p)
             .join(" ")
-            .toLowerCase()
+            .toLocaleUpperCase()
             .includes(lowerFiltre)
         )
       );
@@ -86,11 +86,18 @@ export default function ProduitsPage() {
 
   const handleSubmit = async () => {
     try {
+      const dataToSave = {
+        ...form,
+        typeProduit: form.typeProduit.trim().toLocaleUpperCase(),
+        marque: form.marque.trim().toLocaleUpperCase(),
+        modele: form.modele.trim().toLocaleUpperCase(),
+      };
+
       if (editingId) {
-        await updateDoc(doc(db, "produits", editingId), form);
+        await updateDoc(doc(db, "produits", editingId), dataToSave);
         setEditingId(null);
       } else {
-        await addDoc(collection(db, "produits"), form);
+        await addDoc(collection(db, "produits"), dataToSave);
       }
       setForm({
         typeProduit: "",
@@ -258,7 +265,7 @@ export default function ProduitsPage() {
 
           <input
             className="border p-2 w-full"
-            placeholder="Date d'insertion"
+            placeholder="Date"
             type="date"
             value={form.dateInsertion}
             onChange={(e) => setForm({ ...form, dateInsertion: e.target.value })}
@@ -268,6 +275,7 @@ export default function ProduitsPage() {
             placeholder="N° de marché"
             value={form.numeroMarche}
             onChange={(e) => setForm({ ...form, numeroMarche: e.target.value })}
+            list="modele-list"
           />
           <input
             className="border p-2 w-full"
