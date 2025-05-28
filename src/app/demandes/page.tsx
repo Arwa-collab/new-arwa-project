@@ -9,6 +9,7 @@ import {
   updateDoc,
   doc,
   Timestamp,
+  getDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import AuthGuard from "@/components/AuthGuard";
@@ -19,6 +20,7 @@ import { Home } from "lucide-react";
 
 interface Demande {
   id: string;
+  produitId: string; // <-- ajoute cette ligne
   typeProduit: string;
   modele: string;
   marque: string;
@@ -57,12 +59,10 @@ export default function DemandesPage() {
 
     try {
       if (statut === "acceptée") {
-        await deduireQuantiteStock(demande.typeProduit, demande.quantite);
+        await deduireQuantiteStock(demande.produitId, demande.quantite);
       }
 
       await updateDoc(doc(db, "demandes", id), { statut });
-
-      // Envoi d'email supprimé ici
 
       fetchDemandes();
     } catch (error) {
@@ -133,22 +133,20 @@ export default function DemandesPage() {
   };
 
   // Fonction pour déduire la quantité du stock
-  async function deduireQuantiteStock(typeProduit: string, quantiteDemandee: number) {
-    if (!typeProduit) {
-      alert("Type de produit manquant !");
+  async function deduireQuantiteStock(produitId: string, quantiteDemandee: number) {
+    if (!produitId) {
+      alert("Produit manquant !");
       return;
     }
-    const produitsRef = collection(db, "produits");
-    const q = query(produitsRef, where("typeProduit", "==", typeProduit));
-    const snapshot = await getDocs(q);
+    const produitRef = doc(db, "produits", produitId);
+    const produitSnap = await getDoc(produitRef);
 
-    if (snapshot.empty) {
+    if (!produitSnap.exists()) {
       alert("Produit non trouvé !");
       return;
     }
 
-    const produitDoc = snapshot.docs[0];
-    const produitData = produitDoc.data();
+    const produitData = produitSnap.data();
     const nouvelleQuantite = (produitData.quantite || 0) - quantiteDemandee;
 
     if (nouvelleQuantite < 0) {
@@ -156,7 +154,7 @@ export default function DemandesPage() {
       return;
     }
 
-    await updateDoc(doc(db, "produits", produitDoc.id), { quantite: nouvelleQuantite });
+    await updateDoc(produitRef, { quantite: nouvelleQuantite });
   }
 
   useEffect(() => {

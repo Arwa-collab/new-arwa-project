@@ -69,11 +69,13 @@ function AddDemandePage() {
     try {
       // Crée un nouveau document dans la collection "demandes"
       await addDoc(collection(db, "demandes"), {
-        produitId: selectedProductId, // ID du produit demandé
-        quantiteDemandee, // Quantité souhaitée
-        statut: "en attente", // Statut initial de la demande
-        date: new Date(), // Date de création de la demande
-        userId: user.uid, // ID de l'utilisateur qui fait la demande
+        produitId: selectedProductId,
+        quantite: quantiteDemandee,
+        statut: "en attente",
+        date: new Date(),
+        userId: user.uid,
+        // Ajoute les infos du produit pour faciliter la gestion
+        ...produits.find((p) => p.id === selectedProductId),
       });
 
       router.push("/demandes"); // Redirige vers la page des demandes après succès
