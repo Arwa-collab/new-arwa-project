@@ -186,6 +186,7 @@ export default function NouvelleDemandePage() {
                   required
                   value={matricule}
                   onChange={(e) => setMatricule(e.target.value)}
+                  list="modele-list"
                 />
               </div>
               <div className="space-y-2">
@@ -196,6 +197,7 @@ export default function NouvelleDemandePage() {
                   value={entite}
                   onChange={(e) => setEntite(e.target.value)}
                   placeholder="Ex: Département RH, Service Technique, Unité Logistique..."
+                  list="modele-list"
                 />
               </div>
               
@@ -217,6 +219,7 @@ export default function NouvelleDemandePage() {
                   value={typeProduit}
                   onChange={(e) => setTypeProduit(e.target.value)}
                   placeholder="Ex: ordinateur, toner..."
+                  list="modele-list"
                 />
               </div>
               <div className="space-y-2">
@@ -227,6 +230,7 @@ export default function NouvelleDemandePage() {
                   value={marque}
                   onChange={(e) => setMarque(e.target.value)}
                   placeholder="Ex: Samsung, HP..."
+                  list="modele-list"
                 />
               </div>
               <div className="space-y-2">
@@ -236,7 +240,8 @@ export default function NouvelleDemandePage() {
                   required
                   value={modele}
                   onChange={(e) => setModele(e.target.value)}
-                  placeholder="Ex: Galaxy S21, LaserJet Pro..."
+                  placeholder="Ex: SL-4020..."
+                  list="modele-list"
                 />
               </div>
               <CardFooter className="flex justify-end pt-6">
