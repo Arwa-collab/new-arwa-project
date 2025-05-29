@@ -201,6 +201,38 @@ export default function DashboardPage() {
                       </Button>
                     </CardContent>
                   </Card>
+
+                  {/* Carte Mes demandes */}
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-blue-800">
+                        <ListChecks className="h-5 w-5 mr-2" />
+                        Mes demandes
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Voir les demandes que j'ai effectuées</p>
+                      <Button asChild variant="outline" className="w-full border-blue-300 text-blue-700 hover:bg-blue-50">
+                        <Link href="/mes-demandes">Mes demandes</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
+
+                  {/* Carte Nouvelle demande */}
+                  <Card className="hover:shadow-lg transition-shadow border-blue-200">
+                    <CardHeader className="pb-3">
+                      <CardTitle className="flex items-center text-green-800">
+                        <FilePlus2 className="h-5 w-5 mr-2" />
+                        Nouvelle demande
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                      <p className="text-gray-600 mb-4 text-sm">Faire une nouvelle demande de fourniture</p>
+                      <Button asChild className="w-full bg-green-600 hover:bg-green-700">
+                        <Link href="/nouvelle-demande">Nouvelle demande</Link>
+                      </Button>
+                    </CardContent>
+                  </Card>
                 </div>
               )}
 
@@ -238,9 +270,11 @@ export default function DashboardPage() {
                 </CardContent>
               </Card>
             )}
+
+           
           </div>
         </div>
       </main>
     </div>
   );
-} 
+}
