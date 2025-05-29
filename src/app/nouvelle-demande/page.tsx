@@ -42,7 +42,8 @@ interface UserData {
   matricule: string;
   nomProduit: string;
   quantite: number;
-  modele?: string; // <-- Ajout ici si nécessaire
+  modele?: string;
+  role?: string; // <-- Ajoute ceci
 }
 
 export default function NouvelleDemandePage() {
@@ -97,18 +98,17 @@ export default function NouvelleDemandePage() {
 
     try {
       await addDoc(collection(db, "demandes"), {
-        nom,
-        prenom,
-        matricule,
+        typeProduit: typeProduit.trim().toUpperCase(),
+        marque: marque.trim().toUpperCase(),
+        modele: modele.trim().toUpperCase(),
+        quantite,
+        nom: nom.trim(),
+        prenom: prenom.trim(),
+        statut: "en attente",
+        date: new Date(),
+        createdAt: serverTimestamp(),
         entite,
         demandeurId: matricule,
-        date: dateActuelle,
-        createdAt: serverTimestamp(),
-        statut: "en attente",
-        typeProduit,
-        marque,
-        modele, // <-- Ajout ici
-        quantite,
       });
 
       toast.success("Demande envoyée avec succès !");
@@ -128,8 +128,13 @@ export default function NouvelleDemandePage() {
     );
   }
 
+  if (userData?.role !== "responsable" && userData?.role !== "employe") {
+    router.push("/dashboard");
+    return;
+  }
+
   return (
-    <AuthGuard allowedRoles={["employe"]}>
+    <AuthGuard allowedRoles={["employe", "responsable"]}>
       <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col min-h-screen">
         <Breadcrumb className="mb-6 sm:mb-8">
           <BreadcrumbList>
