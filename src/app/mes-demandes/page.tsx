@@ -8,23 +8,26 @@ import {
   getDocs,
   orderBy,
   Timestamp,
-  doc,        // <-- ajoute ceci
-  getDoc,     // <-- et ceci
+  doc,
+  getDoc,
 } from "firebase/firestore";
 import { db, auth } from "@/lib/firebase";
 import { onAuthStateChanged } from "firebase/auth";
 import AuthGuard from "@/components/AuthGuard";
-import { jsPDF } from "jspdf";
-import Link from "next/link"; 
-import { Loader2, Home, ListChecks, Download, FileWarning } from "lucide-react"; 
-import { Button } from "@/components/ui/button"; 
+// @ts-ignore
+import jsPDF from "jspdf";
+// @ts-ignore
+import autoTable from "jspdf-autotable";
+import Link from "next/link";
+import { Loader2, Home, ListChecks, Download, FileWarning } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
-  CardDescription, 
-} from "@/components/ui/card"; 
+  CardDescription,
+} from "@/components/ui/card";
 import {
   Table,
   TableBody,
@@ -32,17 +35,17 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-  TableCaption, 
-} from "@/components/ui/table"; 
-import { Badge } from "@/components/ui/badge"; 
+  TableCaption,
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
 import {
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from "@/components/ui/select"; 
-import { Label } from "@/components/ui/label"; 
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -50,16 +53,29 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
   BreadcrumbSeparator,
-} from "@/components/ui/breadcrumb"; 
+} from "@/components/ui/breadcrumb";
+import { useRouter } from "next/navigation";
+
+// Ajoute ce bloc pour aider TypeScript à reconnaître les méthodes
+declare module "jspdf" {
+  interface jsPDF {
+    autoTable: typeof autoTable;
+    lastAutoTable?: { finalY: number };
+  }
+}
 
 interface Demande {
   id: string;
   entite: string;
-  date: Timestamp; 
+  date: Timestamp;
   statut: "en attente" | "acceptée" | "refusée";
-  nom?: string; 
-  prenom?: string; 
-  matricule?: string; 
+  nom?: string;
+  prenom?: string;
+  matricule?: string;
+  typeProduit?: string;
+  marque?: string;
+  modele?: string;
+  quantite?: number;
 }
 
 export default function MesDemandesPage() {
@@ -68,6 +84,7 @@ export default function MesDemandesPage() {
   const [statutFilter, setStatutFilter] = useState("tous");
   const [loading, setLoading] = useState(true);
   const [userMatricule, setUserMatricule] = useState<string | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (user) => {
@@ -77,12 +94,17 @@ export default function MesDemandesPage() {
           const userDocSnap = await getDoc(userDocRef);
           const userData = userDocSnap.data();
           const matricule = userData?.matricule;
-          
+
+          // Vérifie le rôle ici
+          if (userData?.role !== "responsable" && userData?.role !== "employe") {
+            router.push("/dashboard");
+            return;
+          }
+
           setUserMatricule(matricule);
-          console.log("Matricule utilisateur connecté :", matricule);
 
           if (!matricule) {
-            setLoading(false); 
+            setLoading(false);
             return;
           }
 
@@ -97,15 +119,8 @@ export default function MesDemandesPage() {
             ...doc.data(),
           })) as any[];
 
-          console.log("Demandes récupérées :", data);
-          if (data.length > 0) {
-            data.forEach(demande => {
-              console.log("demandeurId de la demande :", demande.demandeurId);
-            });
-          }
-
           setDemandes(data);
-          setFilteredDemandes(data); 
+          setFilteredDemandes(data);
         } catch (error) {
           console.error("Error fetching data: ", error);
         }
@@ -128,30 +143,78 @@ export default function MesDemandesPage() {
 
   const handleTelechargerPDF = (demande: Demande) => {
     const doc = new jsPDF();
-    doc.setFontSize(18);
-    doc.text("Fiche de Demande de Fourniture", 105, 20, { align: 'center' });
 
+    // Titre encadré et centré
+    doc.setDrawColor(44, 130, 201);
+    doc.setLineWidth(1);
+    doc.rect(15, 12, 180, 16, "S");
+    doc.setFontSize(16);
+    doc.setFont("helvetica", "bold");
+    doc.text("Fiche de Demande de Fourniture", 105, 22, { align: "center" } as any);
+
+    // Infos générales
     doc.setFontSize(12);
-    doc.text(`ID de la demande: ${demande.id}`, 20, 40);
-    doc.text(`Entité: ${demande.entite}`, 20, 50);
+    doc.setFont("helvetica", "normal");
+    let y = 38;
+    doc.text(`ID de la demande :`, 20, y);
+    doc.text(`${demande.id}`, 65, y);
+    y += 8;
+    doc.text(`Entité :`, 20, y);
+    doc.text(`${demande.entite}`, 65, y);
+    y += 8;
     const formattedDate = demande.date?.toDate ? demande.date.toDate().toLocaleDateString('fr-FR') : 'N/A';
-    doc.text(`Date de la demande: ${formattedDate}`, 20, 60);
-    doc.text(`Statut: ${demande.statut.charAt(0).toUpperCase() + demande.statut.slice(1)}`, 20, 70);
+    doc.text(`Date de la demande :`, 20, y);
+    doc.text(`${formattedDate}`, 65, y);
+    y += 8;
+    doc.text(`Statut :`, 20, y);
+    doc.text(`${demande.statut.charAt(0).toUpperCase() + demande.statut.slice(1)}`, 65, y);
+    y += 8;
     if (demande.nom && demande.prenom) {
-      doc.text(`Demandeur: ${demande.prenom} ${demande.nom} (${demande.matricule || 'N/A'})`, 20, 80);
+      doc.text(`Demandeur :`, 20, y);
+      doc.text(`${demande.prenom} ${demande.nom} (${demande.matricule || 'N/A'})`, 65, y);
+      y += 8;
     }
 
-    doc.line(20, 90, 190, 90); 
+    // Ligne de séparation
+    y += 4;
+    doc.setDrawColor(180);
+    doc.line(20, y, 190, y);
+    y += 10;
 
-    doc.text("Articles demandés:", 20, 100);
-    doc.text("- Item 1 (Quantité: X)", 25, 110);
-    doc.text("- Item 2 (Quantité: Y)", 25, 120);
+    // Détail de la demande sous forme de tableau
+    doc.setFontSize(13);
+    doc.setFont("helvetica", "bold");
+    doc.text("Détail de la demande :", 20, y);
+    y += 8;
+    doc.setFontSize(12);
+    doc.setFont("helvetica", "normal");
 
-    doc.line(20, 230, 190, 230); 
-    doc.setFontSize(10);
-    doc.text("Signature de l'employé: __________________________", 20, 250);
-    doc.text("Signature du responsable: ________________________", 100, 250);
-    doc.text(`Document généré le ${new Date().toLocaleDateString('fr-FR')}`, 105, 280, { align: 'center'});
+    autoTable(doc, {
+      startY: y,
+      head: [["Produit", "Marque", "Modèle", "Quantité"]],
+      body: [[
+        demande.typeProduit || "",
+        demande.marque || "",
+        demande.modele || "",
+        demande.quantite?.toString() || ""
+      ]],
+      theme: "grid",
+      headStyles: { fillColor: [44, 130, 201], textColor: 255, halign: "center" },
+      bodyStyles: { halign: "center" },
+      styles: { font: "helvetica", fontSize: 12 },
+      margin: { left: 20, right: 20 }
+    });
+
+    // Signatures
+    const finalY = doc.lastAutoTable ? doc.lastAutoTable.finalY + 20 : y + 30;
+    doc.setFontSize(11);
+    doc.text("Signature de l'employé :", 20, finalY);
+    doc.text("Signature du responsable :", 120, finalY);
+
+    // Pied de page
+    doc.setFontSize(9);
+    doc.setTextColor(120);
+    doc.text(`Document généré le ${new Date().toLocaleDateString('fr-FR')}`, 105, 285, { align: 'center' });
 
     doc.save(`demande-${demande.id}.pdf`);
   };
@@ -161,11 +224,11 @@ export default function MesDemandesPage() {
   ): "default" | "secondary" | "destructive" | "outline" => {
     switch (statut) {
       case "acceptée":
-        return "default"; 
+        return "default";
       case "refusée":
         return "destructive";
       case "en attente":
-        return "secondary"; 
+        return "secondary";
       default:
         return "outline";
     }
@@ -181,7 +244,7 @@ export default function MesDemandesPage() {
   }
 
   return (
-    <AuthGuard allowedRoles={["employe"]}>
+    <AuthGuard allowedRoles={["employe", "responsable"]}>
       <div className="container mx-auto py-8 px-4 sm:px-6 lg:px-8 flex flex-col min-h-screen">
         <Breadcrumb className="mb-6 sm:mb-8">
           <BreadcrumbList>
@@ -291,3 +354,6 @@ export default function MesDemandesPage() {
     </AuthGuard>
   );
 }
+
+// ...après import autoTable...
+(jsPDF as any).autoTable = autoTable;
