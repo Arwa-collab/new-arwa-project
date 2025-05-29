@@ -14,10 +14,12 @@ import {
 } from "firebase/firestore";
 import { db } from "@/lib/firebase";
 import AuthGuard from "@/components/AuthGuard";
-import { Document, Packer, Paragraph, TextRun } from "docx";
+import { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell, WidthType } from "docx";
 import { saveAs } from "file-saver";//impo
 import Link from "next/link";
 import { Home } from "lucide-react";
+import { BorderStyle } from "docx";
+
 
 interface Demande {
   id: string;
@@ -82,50 +84,100 @@ export default function DemandesPage() {
     const docWord = new Document({
       sections: [
         {
+          properties: {
+            page: {
+              margin: { top: 720, right: 720, bottom: 720, left: 720 },
+            },
+          },
           children: [
             new Paragraph({
               children: [
                 new TextRun({
                   text: "Fiche de retrait de fourniture",
                   bold: true,
-                  size: 32,
+                  size: 60,
+                  font: "Arial",
+                  color: "2E74B5",
                 }),
               ],
+              alignment: "center",
+              spacing: { after: 300 },
+              border: {
+                bottom: { color: "2E74B5", space: 1, style: BorderStyle.SINGLE, size: 6 },
+              },
             }),
             new Paragraph({ text: "" }),
             new Paragraph({
               children: [
-                new TextRun(`Nom du demandeur : ${demande.nom} ${demande.prenom}`),
+                new TextRun({ text: `Nom du demandeur : `, bold: true }),
+                new TextRun(`${demande.nom} ${demande.prenom}`),
               ],
+              spacing: { after: 200 },
             }),
             new Paragraph({
               children: [
+                new TextRun({ text: "Produit demandé : ", bold: true }),
                 new TextRun(
-                  `Produit demandé : ${demande.typeProduit} - ${demande.modele} - ${demande.marque}`
+                  `${demande.typeProduit} - ${demande.modele} - ${demande.marque}`
                 ),
               ],
+              spacing: { after: 200 },
             }),
-            new Paragraph({
-              children: [new TextRun(`Quantité : ${demande.quantite}`)],
-            }),
-            new Paragraph({
-  children: [
-    new TextRun(
-      `Date de la demande : ${
-        demande.date && typeof demande.date.toDate === "function"
-          ? demande.date.toDate().toLocaleString()
-          : typeof demande.date === "string"
-          ? demande.date
-          : "Date inconnue"
-      }`
-    ),
-  ],
-}),
-            new Paragraph({ text: "" }),
             new Paragraph({
               children: [
-                new TextRun("Signature du demandeur : ___________________________"),
+                new TextRun({ text: "Quantité : ", bold: true }),
+                new TextRun(`${demande.quantite}`),
               ],
+              spacing: { after: 200 },
+            }),
+            new Paragraph({
+              children: [
+                new TextRun({ text: "Date de la demande : ", bold: true }),
+                new TextRun(
+                  demande.date && typeof demande.date.toDate === "function"
+                    ? demande.date.toDate().toLocaleString()
+                    : typeof demande.date === "string"
+                    ? demande.date
+                    : "Date inconnue"
+                ),
+              ],
+              spacing: { after: 200 },
+            }),
+            new Paragraph({ text: "" }),
+            new Table({
+              rows: [
+                new TableRow({
+                  children: [
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({
+                          children: [
+                            new TextRun({
+                              text: "Signature du demandeur : ___________________________",
+                              italics: true,
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                    new TableCell({
+                      width: { size: 50, type: WidthType.PERCENTAGE },
+                      children: [
+                        new Paragraph({
+                          children: [
+                            new TextRun({
+                              text: "Signature du responsable : ___________________________",
+                              italics: true,
+                            }),
+                          ],
+                        }),
+                      ],
+                    }),
+                  ],
+                }),
+              ],
+              width: { size: 100, type: WidthType.PERCENTAGE },
             }),
           ],
         },
@@ -154,6 +206,8 @@ export default function DemandesPage() {
         <table className="w-full table-auto border">
           <thead>
             <tr className="bg-gray-200">
+              <th className="p-2 border">Nom</th>
+              <th className="p-2 border">Prénom</th>
               <th className="p-2 border">Type de produit</th>
               <th className="p-2 border">Modèle</th>
               <th className="p-2 border">Marque</th>
@@ -166,6 +220,8 @@ export default function DemandesPage() {
           <tbody>
             {(demandes || []).map((demande) => (
               <tr key={demande.id}>
+                <td className="p-2 border">{demande.nom}</td>
+                <td className="p-2 border">{demande.prenom}</td>
                 <td className="p-2 border">{demande.typeProduit}</td>
                 <td className="p-2 border">{demande.modele}</td>
                 <td className="p-2 border">{demande.marque}</td>
@@ -287,3 +343,4 @@ async function modifierProduit(produitId: string, typeProduit: string, marque: s
     alert("Erreur lors de la modification du produit.");
   }
 }
+
