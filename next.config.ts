@@ -19,12 +19,10 @@ const withPWA = require('next-pwa')({
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
-  // Désactiver ESLint temporairement pour le déploiement
+  reactStrictMode: false, // ← Changez en false
   eslint: {
     ignoreDuringBuilds: true,
   },
-  // Désactiver TypeScript check temporairement
   typescript: {
     ignoreBuildErrors: true,
   },
