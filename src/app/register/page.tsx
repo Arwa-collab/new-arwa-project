@@ -94,47 +94,121 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen bg-muted/40 p-4 sm:p-6">
-      <Card className="w-full max-w-md shadow-xl">
-        <CardHeader className="text-center">
-          <div className="mx-auto mb-4">
-            <UserPlus size={48} className="text-primary" />
+    <div className="flex flex-col items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-blue-100 p-4 sm:p-6">
+      {/* Header avec logo/titre de l'organisation */}
+      <div className="w-full max-w-md mb-6">
+        <div className="bg-white rounded-lg shadow-sm border border-blue-200 p-4 text-center">
+          <div className="text-blue-600 font-semibold text-sm">
+            المكتب الوطني للكهرباء والماء الصالح للشرب
           </div>
-          <CardTitle className="text-3xl font-bold">Créer un compte</CardTitle>
-          <CardDescription className="text-md">
+          <div className="text-blue-600 font-medium text-xs">
+            Office National de l'Électricité et de l'Eau Potable
+          </div>
+          <div className="text-blue-700 font-bold text-right mt-1">
+            Branche Eau
+          </div>
+        </div>
+      </div>
+
+      <Card className="w-full max-w-md shadow-xl bg-white border-blue-200">
+        <CardHeader className="text-center bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-t-lg">
+          <div className="mx-auto mb-4">
+            <UserPlus size={48} className="text-white" />
+          </div>
+          <CardTitle className="text-3xl font-bold text-white">Créer un compte</CardTitle>
+          <CardDescription className="text-blue-100">
             Rejoignez notre plateforme en remplissant le formulaire ci-dessous.
           </CardDescription>
         </CardHeader>
-        <CardContent>
+        <CardContent className="p-6">
           <form onSubmit={handleRegister} className="space-y-4">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="nom">Nom</Label>
-                <Input id="nom" name="nom" placeholder="Doe" onChange={handleChange} value={formData.nom} required disabled={isLoading} />
+                <Label htmlFor="nom" className="text-blue-700 font-medium">Nom</Label>
+                <Input 
+                  id="nom" 
+                  name="nom" 
+                  placeholder="Doe" 
+                  onChange={handleChange} 
+                  value={formData.nom} 
+                  required 
+                  disabled={isLoading}
+                  className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+                />
               </div>
               <div className="space-y-1.5">
-                <Label htmlFor="prenom">Prénom</Label>
-                <Input id="prenom" name="prenom" placeholder="John" onChange={handleChange} value={formData.prenom} required disabled={isLoading} />
+                <Label htmlFor="prenom" className="text-blue-700 font-medium">Prénom</Label>
+                <Input 
+                  id="prenom" 
+                  name="prenom" 
+                  placeholder="John" 
+                  onChange={handleChange} 
+                  value={formData.prenom} 
+                  required 
+                  disabled={isLoading}
+                  className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+                />
               </div>
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="matricule">Matricule</Label>
-              <Input id="matricule" name="matricule" placeholder="E12345" onChange={handleChange} value={formData.matricule} required disabled={isLoading} />
+              <Label htmlFor="matricule" className="text-blue-700 font-medium">Matricule</Label>
+              <Input 
+                id="matricule" 
+                name="matricule" 
+                placeholder="E12345" 
+                onChange={handleChange} 
+                value={formData.matricule} 
+                required 
+                disabled={isLoading}
+                className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="entite">Entité (Optionnel)</Label>
-              <Input id="entite" name="entite" placeholder="Département RH" onChange={handleChange} value={formData.entite} disabled={isLoading} />
+              <Label htmlFor="entite" className="text-blue-700 font-medium">Entité (Optionnel)</Label>
+              <Input 
+                id="entite" 
+                name="entite" 
+                placeholder="Département RH" 
+                onChange={handleChange} 
+                value={formData.entite} 
+                disabled={isLoading}
+                className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="identifiant">identifiant</Label>
-              <Input id="identifiant" type="identifiant" name="identifiant" placeholder="QFatima" onChange={handleChange} value={formData.identifiant} required disabled={isLoading} />
+              <Label htmlFor="identifiant" className="text-blue-700 font-medium">Identifiant</Label>
+              <Input 
+                id="identifiant" 
+                type="text" 
+                name="identifiant" 
+                placeholder="QFatima" 
+                onChange={handleChange} 
+                value={formData.identifiant} 
+                required 
+                disabled={isLoading}
+                className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+              />
             </div>
             <div className="space-y-1.5">
-              <Label htmlFor="password">Mot de passe</Label>
-              <Input id="password" type="password" name="password" placeholder="********" onChange={handleChange} value={formData.password} required disabled={isLoading} />
+              <Label htmlFor="password" className="text-blue-700 font-medium">Mot de passe</Label>
+              <Input 
+                id="password" 
+                type="password" 
+                name="password" 
+                placeholder="••••••••" 
+                onChange={handleChange} 
+                value={formData.password} 
+                required 
+                disabled={isLoading}
+                className="border-blue-200 focus:border-blue-500 focus:ring-blue-500"
+              />
             </div>
             
-            <Button type="submit" className="w-full py-3 text-lg" disabled={isLoading}> 
+            <Button 
+              type="submit" 
+              className="w-full py-3 text-lg bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors" 
+              disabled={isLoading}
+            > 
               {isLoading ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
@@ -146,12 +220,12 @@ export default function RegisterPage() {
             </Button>
           </form>
         </CardContent>
-        <CardFooter className="flex flex-col items-center space-y-2 pt-6">
-          <p className="text-sm text-muted-foreground">
+        <CardFooter className="flex flex-col items-center space-y-2 pt-6 bg-gray-50 rounded-b-lg">
+          <p className="text-sm text-gray-600">
             Déjà un compte ?
           </p>
-          <Button variant="link" asChild className="p-0 h-auto">
-            <Link href="/login">Se connecter</Link>
+          <Button variant="link" asChild className="p-0 h-auto text-blue-600 hover:text-blue-800">
+            <Link href="/login">Se connecter →</Link>
           </Button>
         </CardFooter>
       </Card>
